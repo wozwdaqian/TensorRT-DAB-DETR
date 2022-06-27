@@ -46,10 +46,10 @@ class ONNXExporter:
 
         torch.onnx.export(model, inputs_list[0], onnx_io,
             input_names=input_names, output_names=output_names,export_params=True,training=False,opset_version=12)
-       # torch.onnx.export(model, inputs_list[0], onnx_path,
-       #     input_names=input_names, output_names=output_names,export_params=True,training=False,opset_version=12)
-        torch.onnx.export(model, inputs_list[0], onnx_path, dynamic_axes={input_names[0]: {0:'bs'},output_names[0]:{0:'bs'},output_names[1]:{0:'bs'}}, 
-            input_names=input_names, output_names=output_names, verbose=True, opset_version=12)
+        torch.onnx.export(model, inputs_list[0], onnx_path,
+            input_names=input_names, output_names=output_names,export_params=True,training=False,opset_version=12)
+        #torch.onnx.export(model, inputs_list[0], onnx_path, dynamic_axes={input_names[0]: {0:'bs'},output_names[0]:{0:'bs'},output_names[1]:{0:'bs'}}, 
+        #    input_names=input_names, output_names=output_names, verbose=True, opset_version=12)
         
         print(f"[INFO] ONNX model export success! save path: {onnx_path}")
 
