@@ -23,10 +23,10 @@ import onnx_graphsurgeon as gs
 #from cuda import cudart
 import tensorrt as trt
 
-onnxFile = "./fold.onnx"
+onnxFile = "../fold_v3.onnx"
 onnxSurgeonFile = "./fold-surgeon.onnx"
 soFile = "./LayerNormPlugin.so"
-trtFile = "./fold_v2.plan"
+trtFile = "./fold_v3.plan"
 nBS = 16
 nSL = 64
 nEmbedding = 256
@@ -123,7 +123,9 @@ else:
     network = builder.create_network(1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH))
     profile = builder.create_optimization_profile()
     config = builder.create_builder_config()
-    config.max_workspace_size = 3 << 30
+    config.max_workspace_size = 18 << 30
+    #config.flags = config.flags & ~(1 << int(trt.BuilderFlag.TF32))
+    #config.flags = 1 << int(trt.BuilderFlag.TF32)
     parser = trt.OnnxParser(network, logger)
     if not os.path.exists(onnxSurgeonFile):
         print("Failed finding onnx file!")
@@ -140,9 +142,9 @@ else:
     inputTensor = network.get_input(0)
     outputTensor0 = network.get_output(0)
     outputTensor1 = network.get_output(1)
-    profile.set_shape(inputTensor.name, [1, 3, 800, 800], [4, 3, 800, 800], [16, 3, 800, 800])
-    profile.set_shape(outputTensor0.name, [1, 900, 91], [4, 900, 91], [16, 900, 91])
-    profile.set_shape(outputTensor1.name, [1, 900, 4], [4, 900, 4], [16, 900, 4])
+    #profile.set_shape(inputTensor.name, [1, 3, 800, 800], [4, 3, 800, 800], [16, 3, 800, 800])
+    #profile.set_shape(outputTensor0.name, [1, 900, 91], [4, 900, 91], [16, 900, 91])
+    #profile.set_shape(outputTensor1.name, [1, 900, 4], [4, 900, 4], [16, 900, 4])
     config.add_optimization_profile(profile)
     engineString = builder.build_serialized_network(network, config)
     if engineString == None:
@@ -175,3 +177,4 @@ cudart.cudaFree(inputD0)
 cudart.cudaFree(outputD0)
 print("Succeeded running model in TensorRT!")
 '''
+
