@@ -6,7 +6,7 @@
 使用parser来转换onnx模型生成Plan文件，在这其中使用了graphsurgeon工具修改计算图，以及使用cuda c++编写 Plugin替换myelin自动生成的Layer Normlization，然后优化kernel提升 plugin性能。
 
 # 模型优化
-本团队采用了COCO数据集作为测试集，样本数量为100张。原模型单张样本的推理速度约为0.03s。我们根据[cookbook](https://github.com/NVIDIA/trt-samples-for-hackathon-cn)中的pluin和oneflow中https://github.com/Oneflow-Inc/oneflow/blob/master/oneflow/core/cuda/layer_norm.cuh测试了两个版本的Plugin替换Layer Normlization
+本团队采用了COCO数据集作为测试集，样本数量为100张。在A10环境下，原模型单张样本的推理速度约为0.03s。我们根据[cookbook](https://github.com/NVIDIA/trt-samples-for-hackathon-cn)中的pluin和oneflow中https://github.com/Oneflow-Inc/oneflow/blob/master/oneflow/core/cuda/layer_norm.cuh测试了两个版本的Plugin替换Layer Normlization
 
 - 当设定batch size为1时：
 - 在使用第一版Plugin替换Layer Normlization的表现为单张推理速度约为0.01s，加速倍率在3.2-3.6倍左右。
