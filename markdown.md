@@ -108,6 +108,8 @@ pip install onnx
 
 pip install cuda-python
 
+pip install colored
+
 '''
 
 编译CUDA计算器
@@ -129,6 +131,19 @@ cd ../../..
 
 下载原模型到本地目录下的/model_zoo/DAB_DETR/R50/DAB_DETR_R50/，若因为模型太大无法拉取，可从源项目下载，开源地址为https://cloud.tsinghua.edu.cn/d/3aa9d0da60e8423dab54/?p=%2FDAB_DETR%2FR50&mode=list
 
+本项目的测试样本为coco数据集，格式如下
+
+'''
+
+---TensorRT-DAB-DETR
+|---------COCODIR
+|--------------COCO2017
+|------------------annotations
+|------------------train2017
+|------------------val2017
+
+'''
+
 将模型导出为onnx
 
 '''
@@ -139,7 +154,7 @@ python export_onnx_sim.py
 常量折叠
 
 '''
-polygraphy surgeon sanitize detr-smi-changed.onnx --fold-constants -o fold_v3.onnx
+polygraphy surgeon sanitize detr_sim_changed.onnx --fold-constants -o fold_v3.onnx
 '''
 
 手动书写Plugin替换Layer Normlization
@@ -183,7 +198,7 @@ python test.py
 
 参照着开源项目的推理脚本，导入训练好的模型和参数，之后再转成onnx模型，简便起见，我们再torch.onnx.export方法中只将batch_size设定为动态尺寸，其余全部固定，并令opset_version=12。
 
-在导出onnx时，本团队使用了onnxruntime来检测了导出精度，确保了与原模型的精度差在符合的要求内。
+在导出onnx时，本团队使用了onnxruntime来检测了导出精度，确保了与原模型的精度差在符合的要求内。之后利用onnxsim优化导出的onnx模型。
 
 在利用netron查看导出的onnx文件是，无法观察到每个输入输出张量的尺寸及数据类型，因此，利用onnx中shape_inference另存为onnx，使之能在netron中显示每个张量的尺寸及数据类型。
 
@@ -305,3 +320,4 @@ WelfordBlockAllReduce 是借助 WelfordWarpReduce 操作完成的，具体逻辑
 logits绝对误差的平均值:9.e-04, 最大值:0.002, 中位数:6.e-04；logits相对误差的平均值:1.e-04, 最大值:0.004, 中位数:7.e-05。
 
 boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits相对误差的平均值:6.e-04, 最大值:0.02, 中位数:2.e-04。
+
