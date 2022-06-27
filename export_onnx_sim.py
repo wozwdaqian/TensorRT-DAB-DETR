@@ -158,6 +158,8 @@ if __name__ == '__main__':
 
     model_config_path = "model_zoo/DAB_DETR/R50/DAB_DETR_R50/config.json" 
     model_checkpoint_path = "model_zoo/DAB_DETR/R50/DAB_DETR_R50/checkpoint.pth"
+    #model_config_path = "model_zoo/config.json" 
+    #model_checkpoint_path = "model_zoo/checkpoint.pth"
     onnx_path = "detr.onnx"
     img_path = "test.jpg"
 
