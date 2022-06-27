@@ -4,6 +4,12 @@ from util.slconfig import SLConfig
 from util.visualizer import COCOVisualizer
 from time import time
 import torch
+from models import build_DABDETR
+from datasets import build_dataset, get_coco_api_from_dataset
+from util.slconfig import SLConfig
+from util.visualizer import COCOVisualizer
+from time import time
+import torch
 from testLayerNormPlugin import *
 import ctypes
 from cuda import cudart
@@ -41,8 +47,8 @@ def defference(x, y, name, error_num):
     mean_relative = np.mean(relative)
     max_relative = max(relative)
     median_relative = np.median(relative)
-    print("{}绝对误差的平均值:{}, 最大值:{}, 中位数:{}".format(name, mean_relative, max_relative, median_relative))
-    
+    print("{}相对误差的平均值:{}, 最大值:{}, 中位数:{}".format(name, mean_relative, max_relative, median_relative))
+
     if name == "logits":
         absolute_logits.append([mean_absolute, max_absolute, median_absolute])
         relative_logits.append([mean_relative, max_relative, median_relative])
@@ -56,7 +62,7 @@ def load_trt_model(trtFile, batch_size):
     #soFilePath = "./oneflow_LN/LayerNormPlugin.so"
     epsilon = 1e-5
     npDataType = np.float32
-    
+
     logger = trt.Logger(trt.Logger.ERROR)
     trt.init_libnvinfer_plugins(logger, '')
     ctypes.cdll.LoadLibrary(soFilePath)
@@ -71,21 +77,20 @@ def load_trt_model(trtFile, batch_size):
     else:
         print('你的engine无了')
 
-
-    context = engine.create_execution_context()
+context = engine.create_execution_context()
     context.set_binding_shape(0, [batch_size, 3, 800, 800])
-#     context.set_binding_shape(1, [batch_size, 900, 91])
-#     context.set_binding_shape(2, [batch_size, 900, 4])
+    context.set_binding_shape(1, [batch_size, 300, 91])
+    context.set_binding_shape(2, [batch_size, 300, 4])
 
     print("Binding all? %s" % (["No", "Yes"][int(context.all_binding_shapes_specified)]))
     return engine, context
 
-model_config_path = "model_zoo/DAB_DETR/R50/DAB_DETR_R50/config.json" 
+model_config_path = "model_zoo/DAB_DETR/R50/DAB_DETR_R50/config.json"
 model_checkpoint_path = "model_zoo/DAB_DETR/R50/DAB_DETR_R50/checkpoint.pth"
 # onnx_path = "detr_sim.onnx_changed.onnx"
 # img_path = "test.jpg"
-trtFile = "./LN_onnx/fold_v2.plan"
-#trtFile = "./oneflow_LN/fold_v2.plan"
+trtFile = "./LN_onnx/fold_v3.plan"
+#trtFile = "./oneflow_LN/fold_v3.plan"
 
 args = SLConfig.fromfile(model_config_path)
 dataset_val = build_dataset(image_set='val', args=args)
@@ -103,6 +108,7 @@ engine, context = load_trt_model(trtFile, batch_size)
 
 
 
+
 for image, target in dataset_val:
     print("----------------------", num)
     if num == 100:
@@ -112,18 +118,9 @@ for image, target in dataset_val:
     images = torch.tensor([])
     for i in range(batch_size):
         images = torch.cat((images, image))
-#     print(image.shape)
-    t1 = time()
-    # pth result
-    output_pth_ = model_pth(images.cuda())
-    time_pth = time() - t1
-    print("time_pth:", time_pth)
-#     print(output_pth_)
-#     output_pth = postprocessors['bbox'](output_pth_, torch.Tensor([[1.0, 1.0]]).cuda())[0]
+    print(images.shape)
 
-    # trt result
-#     nInput = np.sum([engine.binding_is_input(i) for i in range(engine.num_bindings)])
-#     nOutput = engine.num_bindings - nInput
+
     _, stream = cudart.cudaStreamCreate()
 
     inputH0 = np.ascontiguousarray(images.reshape(-1))
@@ -134,17 +131,27 @@ for image, target in dataset_val:
     _, outputD1 = cudart.cudaMallocAsync(outputH1.nbytes, stream)
 
     cudart.cudaMemcpyAsync(inputD0, inputH0.ctypes.data, inputH0.nbytes, cudart.cudaMemcpyKind.cudaMemcpyHostToDevice, stream)
-    t2 = time()
+    t1 = time()
     context.execute_async_v2([int(inputD0), int(outputD0), int(outputD1)], stream)
-    time_trt = time() - t2
+    print("##################")
+    print(context.get_binding_shape(0), context.get_binding_shape(1), context.get_binding_shape(2))
+    time_trt = time() - t1
     print("time_trt:", time_trt)
     cudart.cudaMemcpyAsync(outputH0.ctypes.data, outputD0, outputH0.nbytes, cudart.cudaMemcpyKind.cudaMemcpyDeviceToHost, stream)
     cudart.cudaMemcpyAsync(outputH1.ctypes.data, outputD1, outputH1.nbytes, cudart.cudaMemcpyKind.cudaMemcpyDeviceToHost, stream)
     cudart.cudaStreamSynchronize(stream)
-
     output_trt = {"pred_logits":torch.from_numpy(outputH0), "pred_boxes":torch.from_numpy(outputH1)}
+
+
+    images = images.cuda()
+    # pth result
+    t2 = time()
+    output_pth_ = model_pth(images)
+    time_pth = time() - t2
+    print("time_pth:", time_pth)
+
 #     output_trt = postprocessors['bbox'](output_trt, torch.Tensor([[1.0, 1.0]]))[0]
-    
+
     # 加速倍率
     print("加速倍率:{}".format(float(time_pth)/float(time_trt)))
     # logits
@@ -157,5 +164,3 @@ for image, target in dataset_val:
     cudart.cudaFree(inputD0)
     cudart.cudaFree(outputD0)
     cudart.cudaFree(outputD1)
-
-print(error_num)
