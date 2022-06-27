@@ -6,7 +6,7 @@
 使用parser来转换onnx模型生成Plan文件，在这其中使用了graphsurgeon工具修改计算图，以及使用cuda c++编写 Plugin替换myelin自动生成的Layer Normlization，然后优化kernel提升 plugin性能。
 
 # 模型优化
-本团队采用了COCO数据集作为测试集，样本数量为100张。原模型单张样本的推理速度约为0.03s。我们根据[cookbook](https://github.com/NVIDIA/trt-samples-for-hackathon-cn)中的pluin测试了两个版本的Plugin替换Layer Normlization
+本团队采用了COCO数据集作为测试集，样本数量为100张。原模型单张样本的推理速度约为0.03s。我们根据[cookbook](https://github.com/NVIDIA/trt-samples-for-hackathon-cn)中的pluin和oneflow中https://github.com/Oneflow-Inc/oneflow/blob/master/oneflow/core/cuda/layer_norm.cuh测试了两个版本的Plugin替换Layer Normlization
 
 - 当设定batch size为1时：
 - 在使用第一版Plugin替换Layer Normlization的表现为单张推理速度约为0.01s，加速倍率在3.2-3.6倍左右。
@@ -87,6 +87,7 @@ boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits�
         pip install onnxruntime
         pip install onnx
         pip install cuda-python
+        pip install colored
 6. 编译CUDA计算器
 
         cd models/dab_deformable_detr/ops/
@@ -101,13 +102,25 @@ boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits�
 
 下载原模型到本地目录下的/model_zoo/DAB_DETR/R50/DAB_DETR_R50/，若因为模型太大无法拉取，可从源项目下载，开源地址为https://cloud.tsinghua.edu.cn/d/3aa9d0da60e8423dab54/?p=%2FDAB_DETR%2FR50&mode=list
 
+本项目的测试样本为coco数据集，路径如下
+
+
+
+TensorRT-DAB-DETR
+|---------COCODIR
+          |-----COCO2017
+                |---annotations
+                |---train2017
+                |---val2017
+
+
 将模型导出为onnx
 
         python export_onnx_sim.py
 
 执行优化过程，常量折叠
 
-        polygraphy surgeon sanitize detr-smi-changed.onnx --fold-constants -o fold_v3.onnx
+        polygraphy surgeon sanitize detr_sim_changed.onnx --fold-constants -o fold_v3.onnx
 
 手动书写Plugin替换Layer Normlization
 1. 第一版Plugin
@@ -142,7 +155,7 @@ boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits�
 
 参照着开源项目的推理脚本，导入训练好的模型和参数，之后再转成onnx模型，简便起见，我们再torch.onnx.export方法中只将batch_size设定为动态尺寸，其余全部固定，并令opset_version=12。
 
-在导出onnx时，本团队使用了onnxruntime来检测了导出精度，确保了与原模型的精度差在符合的要求内。
+在导出onnx时，本团队使用了onnxruntime来检测了导出精度，确保了与原模型的精度差在符合的要求内,之后利用onnxsim优化导出的onnx模型。。
 
 在利用netron查看导出的onnx文件是，无法观察到每个输入输出张量的尺寸及数据类型，因此，利用onnx中shape_inference另存为onnx，使之能在netron中显示每个张量的尺寸及数据类型。
 
