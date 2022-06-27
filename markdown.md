@@ -173,6 +173,8 @@ python test.py
 
 该模型适用于目标检测领域，其直接使用框坐标作为 Transformer 的decoders中的查询，并逐层动态更新它们。使用框坐标不仅有助于消除 DETR 中缓慢的训练收敛问题，而且还允许使用框的宽度和高度信息来调制attention。结果，它在相同设置下的类似 DETR 的检测模型中导致 MS-COCO 基准测试的最佳性能，例如，使用 ResNet50-DC5 作为主干训练 50 个 epoch 的 AP 45.7%。
 
+本模型的框架见struction.jpg。
+
 #模型优化的难点
 
 该项目在训练后，模型和参数是分开保存的，因此在导入时，应分别导入模型以及参数后再进行导出onnx操作。再使用parser转换onnx模型生成Plan文件时，模型的Pad节点不被TensorRT8.2支持，且TensorRT-8.4.1.4不支持ND ShapeTensor。
@@ -180,6 +182,8 @@ python test.py
 #优化过程
 
 参照着开源项目的推理脚本，导入训练好的模型和参数，之后再转成onnx模型，简便起见，我们再torch.onnx.export方法中只将batch_size设定为动态尺寸，其余全部固定，并令opset_version=12。
+
+在导出onnx时，本团队使用了onnxruntime来检测了导出精度，确保了与原模型的精度差在符合的要求内。
 
 在利用netron查看导出的onnx文件是，无法观察到每个输入输出张量的尺寸及数据类型，因此，利用onnx中shape_inference另存为onnx，使之能在netron中显示每个张量的尺寸及数据类型。
 
@@ -280,6 +284,8 @@ WelfordBlockAllReduce 是借助 WelfordWarpReduce 操作完成的，具体逻辑
 此外，由于 Block 内线程要做同步，当 SM 中正在调度执行的一个 Block 到达同步点时，SM 内可执行 Warp 逐渐减少，若同时执行的 Block 只有一个，则 SM 中可同时执行的 Warp 会在此时逐渐降成0，会导致计算资源空闲，造成浪费，若此时同时有其他 Block 在执行，则在一个 Block 到达同步点时仍然有其他 Block 可以执行。
 
 当 block_size 越小时，SM 可同时调度的 Block 越多，因此在这种情况下 block_size 越小越好。但是当在调大 block_size，SM 能同时调度的 Block 数不变的情况下，block_size 应该是越大越好，越大就有越好的并行度。因此代码中在选择 block_size 时，对不同 block_size 都计算了 cudaOccupancyMaxActiveBlocksPerMultiprocessor，若结果相同，使用较大的 block_size。
+
+在构建完毕引擎后，利用nsight systems分析一次构建和运行期的时间，图片详见nsys1-4.png。
 
 #精度与加速效果
 
