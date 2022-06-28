@@ -236,7 +236,7 @@ def make_coco_transforms(image_set, fix_size=False, strong_aug=False, args=None)
             ])   
 
         return T.Compose([
-            T.RandomResize([max(scales)], max_size=max_size),
+            T.ResizeDebug((800, 800)),
             normalize,
         ])
 
