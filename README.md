@@ -107,9 +107,13 @@ boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits�
 
 TensorRT-DAB-DETR
 |---------COCODIR
+
           |-----COCO2017
+          
                 |---annotations
+                
                 |---train2017
+                
                 |---val2017
 
 
