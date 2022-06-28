@@ -1,6 +1,6 @@
 #include "LayerNormPlugin.h"
 #include "layer_norm.cuh"
-
+using namespace oneflow::cuda::layer_norm;
 using namespace nvinfer1;
 
 PluginFieldCollection    LayerNormPluginCreator::fc_ {};
@@ -76,7 +76,7 @@ int32_t LayerNormPlugin::enqueue(const PluginTensorDesc *inputDesc, const Plugin
     constexpr int cols_per_thread = 8;
     constexpr int thread_group_width = 32;
    
-    constexpr int rows = inputDesc[0].dims.d[0] * inputDesc[0].dims.d[1];
+    int rows = inputDesc[0].dims.d[0] * inputDesc[0].dims.d[1];
     constexpr int cols = 256;
     
     constexpr int block_size = 128;
