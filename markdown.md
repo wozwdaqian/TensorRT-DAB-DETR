@@ -129,7 +129,7 @@ cd ../../..
 
 #项目优化
 
-下载原模型到本地目录下的/model_zoo/DAB_DETR/R50/DAB_DETR_R50/，若因为模型太大无法拉取，可从源项目下载，开源地址为https://cloud.tsinghua.edu.cn/d/3aa9d0da60e8423dab54/?p=%2FDAB_DETR%2FR50&mode=list
+下载原模型到本地目录下的/model_zoo/DAB_DETR/R50/DAB_DETR_R50/，若因为模型太大无法拉取，可从源项目下载，开源地址为https://cloud.tsinghua.edu.cn/d/3aa9d0da60e8423dab54/?p=%2FDAB_DETR%2FR50&mode=list，后将模型config中"coco path"改为"COCODIR/"
 
 本项目的测试样本为coco数据集，格式如下
 
