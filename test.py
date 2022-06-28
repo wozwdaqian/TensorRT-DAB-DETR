@@ -78,9 +78,9 @@ def load_trt_model(trtFile, batch_size):
         print('你的engine无了')
 
     context = engine.create_execution_context()
-    context.set_binding_shape(0, [batch_size, 3, 800, 800])
-    context.set_binding_shape(1, [batch_size, 300, 91])
-    context.set_binding_shape(2, [batch_size, 300, 4])
+    # context.set_binding_shape(0, [batch_size, 3, 800, 800])
+    # context.set_binding_shape(1, [batch_size, 300, 91])
+    # context.set_binding_shape(2, [batch_size, 300, 4])
 
     print("Binding all? %s" % (["No", "Yes"][int(context.all_binding_shapes_specified)]))
     return engine, context
