@@ -30,15 +30,15 @@ boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits�
 
 如果你的docker是19.03后者更新的版本，则运行：
 
-'''
-docker run --gpus all -it -v local_dir:container_dir nvcr.io/nvidia/pytorch:21.12-py3
-'''
+
+    docker run --gpus all -it -v local_dir:container_dir nvcr.io/nvidia/pytorch:21.12-py3
+
 
 如果是19.02或者更早的版本，则运行：
 
-'''
-nvidia-docker run -it --rm -v local_dir:container_dir nvcr.io/nvidia/pytorch:21.12-py3
-'''
+
+    nvidia-docker run -it --rm -v local_dir:container_dir nvcr.io/nvidia/pytorch:21.12-py3
+
 
 下一步安装tensor8.4版本，本团队使用的版本为8.4.1.5，官网链接：https://developer.nvidia.com/nvidia-tensorrt-download
 
@@ -46,20 +46,18 @@ nvidia-docker run -it --rm -v local_dir:container_dir nvcr.io/nvidia/pytorch:21.
 
 这里推荐安装在/opt目录下，否则在替换Plugin时需要修改makefile文件中的TensorRT路径。然后解压这个文件。
 
-'''
-cd /opt
-tar -zxvf TensorRT-8.4.1.5.Linux.x86_64-gnu.cuda-11.6.cudnn8.4.tar.gz
-'''
+
+    cd /opt
+    tar -zxvf TensorRT-8.4.1.5.Linux.x86_64-gnu.cuda-11.6.cudnn8.4.tar.gz
+
 
 添见环境变量
 
-'''
-sudo vi ~/.bashrc
 
-export LD_LIBRARY_PATH=/opt/TensorRT-8_4_1_5/lib:$LD_LIBRARY_PATH
+    sudo vi ~/.bashrc
+    export LD_LIBRARY_PATH=/opt/TensorRT-8_4_1_5/lib:$LD_LIBRARY_PATH
+    source ~/.bashrc
 
-source ~/.bashrc
-'''
 
 安装tensorrt的python包。进入tensorrt压缩之后的文件夹，然后进入里面的python文件夹
 
