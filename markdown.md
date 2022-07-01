@@ -326,3 +326,17 @@ logits绝对误差的平均值:9.e-04, 最大值:0.002, 中位数:6.e-04；logit
 
 boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits相对误差的平均值:6.e-04, 最大值:0.02, 中位数:2.e-04。
 
+# Bug报告
+## Environment
+- TensorRT 8.4 GA
+- NGC镜像nvcr.io/nvidia/pytorch:21.12-py3
+- NVIDIA driver version：470
+## Reproduction Steps
+- 在导入模型前将原模型的config.json文件中aux_loss改为true，按照readme中步骤开始导入onnx模型直至生成engine。之后运行当前路径下的test.py。
+## Expected Behavior
+- Provide 导入engine成功并开始执行推理。
+## Actual Behavior
+- context.execute_async_v2([int(inputD0), int(outputD0), int(outputD1)], stream) 处报错。
+- 报错信息：[TRT] [E]1:[cudaDriverHelpers.cpp;:operator()::29] Error Code 1: Cuda Driver (misaligned address)
+## Additional Notes
+- config.json文件中aux_loss改为fales时即可成功执行推理过程。
