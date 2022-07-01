@@ -61,31 +61,21 @@ boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits�
 
 安装tensorrt的python包。进入tensorrt压缩之后的文件夹，然后进入里面的python文件夹
 
-'''
-cd /opt/TensorRT-8_4_1_5/python
-'''
+    cd /opt/TensorRT-8_4_1_5/python
 
 python文件夹里面有很多版本，使用pip安装自己对应的python版本，例如本团队的是python3.8，则执行
 
-'''
-pip install tensorrt-8.4.1.5-cp38-none-linux_x86_64.whl
-'''
+    pip install tensorrt-8.4.1.5-cp38-none-linux_x86_64.whl
 
 安装 uff 包
 
-'''
-cd ../uff    
-
-pip install uff-0.6.9-py2.py3-none-any.whl
-'''
+    cd ../uff    
+    pip install uff-0.6.9-py2.py3-none-any.whl
 
 安装 graphsurgen 包
 
-'''
-cd ../graphsurgeon     
-
-pip install graphsurgeon-0.4.6-py2.py3-none-any.whl
-'''
+    cd ../graphsurgeon     
+    pip install graphsurgeon-0.4.6-py2.py3-none-any.whl
 
 安装 onnx_graphsurgeon 包
 
