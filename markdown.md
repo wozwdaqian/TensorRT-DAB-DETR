@@ -79,41 +79,27 @@ python文件夹里面有很多版本，使用pip安装自己对应的python版�
 
 安装 onnx_graphsurgeon 包
 
-'''
-cd ../onnx_graphsurgeon  
-   
-pip install onnx_graphsurgeon-0.3.12-py2.py3-none-any.whl
-'''
+
+    cd ../onnx_graphsurgeon     
+    pip install onnx_graphsurgeon-0.3.12-py2.py3-none-any.whl
 
 进入项目文件夹，下载项目所需依赖库，推荐使用国内的源进行下载，否则下载速度太慢
 
-'''
-pip install -r requirements.txt
-
-pip install onnxruntime
-
-pip install onnx
-
-pip install cuda-python
-
-pip install colored
-
-'''
+    pip install -r requirements.txt
+    pip install onnxruntime
+    pip install onnx
+    pip install cuda-python
+    pip install colored
 
 编译CUDA计算器
 
-'''
-cd models/dab_deformable_detr/ops/
-python setup.py build install
-'''
+    cd models/dab_deformable_detr/ops/
+    python setup.py build install
 
 测试依赖库是否装齐（若显存过小，会报错out of memory，不需要管他）
 
-'''
-python test.py
-
-cd ../../..
-'''
+    python test.py
+    cd ../../..
 
 #项目优化
 
