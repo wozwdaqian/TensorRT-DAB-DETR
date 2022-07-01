@@ -179,9 +179,7 @@ TshuffleNode.coo:isvmbolicExecute::3921ErconCode 4:Internal Error(Reshane_33: IS
 
 之后利用polygraphy进行优化，利用常量折叠优化部分算子：
 
-'''
-polygraphy surgeon sanitize ChangeDETR.onnx --fold-constants -o fold.onnx
-'''
+    polygraphy surgeon sanitize ChangeDETR.onnx --fold-constants -o fold.onnx
 
 执行后通过netron打开优化好的flod.onnx，发现带有自动推导的Reshape节点被自动折叠优化。查询后，发现官方的回答如下：
 
@@ -269,7 +267,7 @@ WelfordBlockAllReduce 是借助 WelfordWarpReduce 操作完成的，具体逻辑
 
 在构建完毕引擎后，利用nsight systems分析一次构建和运行期的时间，图片详见nsys1-4.png。
 
-#精度与加速效果
+# 精度与加速效果
 
 测试的脚本为./test/test_engine.py,将两个版本生成的Plan文件添加到./test/路径下，再修改test——engine.py中engine的路径即可进行模型的精度与速度的优化对比。
 
@@ -278,7 +276,6 @@ WelfordBlockAllReduce 是借助 WelfordWarpReduce 操作完成的，具体逻辑
 当batch size为1时：
 
 本团队采用了COCO数据集作为测试集，样本数量为100张。原模型单张样本的推理速度约为0.03s。
-
 
 在使用第一版Plugin替换Layer Normlization的表现为单张推理速度约为0.01s，加速倍率在3.2-3.6倍左右。
 
