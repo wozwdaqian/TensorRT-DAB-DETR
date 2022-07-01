@@ -125,55 +125,43 @@ python文件夹里面有很多版本，使用pip安装自己对应的python版�
 
 将模型导出为onnx
 
-'''
-python export_onnx_sim.py
-'''
+    python export_onnx_sim.py
 
 执行优化过程，
 常量折叠
 
-'''
-polygraphy surgeon sanitize detr_sim_changed.onnx --fold-constants -o fold_v3.onnx
-'''
+    polygraphy surgeon sanitize detr_sim_changed.onnx --fold-constants -o fold_v3.onnx
 
 手动书写Plugin替换Layer Normlization
-第一版Plugin
+#第一版Plugin
 
-'''
-cd LN_onnx
-
-python main.py
-'''
+    cd LN_onnx
+    python main.py
 
 #第二版Plugin
 
-'''
-cd oneflow_LN
+    cd oneflow_LN
+    python main.py
 
-python main.py
-'''
-
-#精度测试
+# 精度测试
 
 测试基础版Plugin或者oneflow版本的Plugin需要分别修改test.py文件中55和87行，修改Plan文件与so文件的路径
 
-'''
-python test.py
-'''
+    python test.py
 
-#原始模型
+# 原始模型
 
-#模型简介
+## 模型简介
 
 该模型适用于目标检测领域，其直接使用框坐标作为 Transformer 的decoders中的查询，并逐层动态更新它们。使用框坐标不仅有助于消除 DETR 中缓慢的训练收敛问题，而且还允许使用框的宽度和高度信息来调制attention。结果，它在相同设置下的类似 DETR 的检测模型中导致 MS-COCO 基准测试的最佳性能，例如，使用 ResNet50-DC5 作为主干训练 50 个 epoch 的 AP 45.7%。
 
 本模型的框架见struction.jpg。
 
-#模型优化的难点
+## 模型优化的难点
 
 该项目在训练后，模型和参数是分开保存的，因此在导入时，应分别导入模型以及参数后再进行导出onnx操作。再使用parser转换onnx模型生成Plan文件时，模型的Pad节点不被TensorRT8.2支持，且TensorRT-8.4.1.4不支持ND ShapeTensor。
 
-#优化过程
+# 优化过程
 
 参照着开源项目的推理脚本，导入训练好的模型和参数，之后再转成onnx模型，简便起见，我们再torch.onnx.export方法中只将batch_size设定为动态尺寸，其余全部固定，并令opset_version=12。
 
