@@ -23,7 +23,7 @@ boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits�
 拉取镜像
 
 
-  docker pull nvcr.io/nvidia/pytorch:21.12-py3
+    docker pull nvcr.io/nvidia/pytorch:21.12-py3
 
 
 运行容器
