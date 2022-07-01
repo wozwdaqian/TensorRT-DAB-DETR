@@ -1,11 +1,11 @@
-#总述
+# 总述
 
-#主要工作
+# 主要工作
 本团队主要工作为利用TensorRT加速模型DAB-DETR，项目开源地址：https://github.com/IDEA-opensource/DAB-DETR
 
 使用parser来转换onnx模型生成Plan文件，在这其中使用了graphsurgeon工具修改计算图，以及使用cuda c++编写 Plugin替换myelin自动生成的Layer Normlization，然后优化kernel提升 plugin性能。
 
-#模型优化
+# 模型优化
 本团队采用了COCO数据集作为测试集，样本数量为100张。原模型单张样本的推理速度约为0.03s。
 
 当设定batch size为1时：
@@ -18,13 +18,13 @@ logits绝对误差的平均值:9.e-04, 最大值:0.002, 中位数:6.e-04；logit
 
 boxs绝对误差的平均值:1.e-04, 最大值:0.003, 中位数:7.e-05；logits相对误差的平均值:6.e-04, 最大值:0.02, 中位数:2.e-04。
 
-#项目环境搭建
+# 项目环境搭建
 
 拉取镜像
 
-'''
-docker pull nvcr.io/nvidia/pytorch:21.12-py3
-'''
+
+  docker pull nvcr.io/nvidia/pytorch:21.12-py3
+
 
 运行容器
 
