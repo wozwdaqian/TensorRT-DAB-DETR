@@ -4,6 +4,7 @@ from util.slconfig import SLConfig
 from util.visualizer import COCOVisualizer
 from time import time
 import torch
+import torch.cuda
 from models import build_DABDETR
 from datasets import build_dataset, get_coco_api_from_dataset
 from util.slconfig import SLConfig
@@ -118,7 +119,6 @@ for image, target in dataset_val:
     images = torch.tensor([])
     for i in range(batch_size):
         images = torch.cat((images, image))
-    print(images.shape)
 
 
     _, stream = cudart.cudaStreamCreate()
@@ -131,12 +131,19 @@ for image, target in dataset_val:
     _, outputD1 = cudart.cudaMallocAsync(outputH1.nbytes, stream)
 
     cudart.cudaMemcpyAsync(inputD0, inputH0.ctypes.data, inputH0.nbytes, cudart.cudaMemcpyKind.cudaMemcpyHostToDevice, stream)
-    t1 = time()
+    
+    torch.cuda.synchronize()
+    start_trt = torch.cuda.Event(enable_timing=True)
+    end_trt = torch.cuda.Event(enable_timing=True)
+    start_trt.record()
+    # 推理
     context.execute_async_v2([int(inputD0), int(outputD0), int(outputD1)], stream)
-    print("##################")
-    print(context.get_binding_shape(0), context.get_binding_shape(1), context.get_binding_shape(2))
-    time_trt = time() - t1
+    torch.cuda.synchronize()
+    end_trt.record()
+    time_trt = start_trt.elapsed_time(end_trt)
     print("time_trt:", time_trt)
+
+
     cudart.cudaMemcpyAsync(outputH0.ctypes.data, outputD0, outputH0.nbytes, cudart.cudaMemcpyKind.cudaMemcpyDeviceToHost, stream)
     cudart.cudaMemcpyAsync(outputH1.ctypes.data, outputD1, outputH1.nbytes, cudart.cudaMemcpyKind.cudaMemcpyDeviceToHost, stream)
     cudart.cudaStreamSynchronize(stream)
@@ -145,9 +152,15 @@ for image, target in dataset_val:
 
     images = images.cuda()
     # pth result
-    t2 = time()
+    torch.cuda.synchronize()
+    start_pth = torch.cuda.Event(enable_timing=True)
+    end_pth = torch.cuda.Event(enable_timing=True)
+    start_pth.record()
+    # 推理
     output_pth_ = model_pth(images)
-    time_pth = time() - t2
+    torch.cuda.synchronize()
+    end_pth.record()
+    time_pth = float(start_pth.elapsed_time(end_pth))
     print("time_pth:", time_pth)
 
 #     output_trt = postprocessors['bbox'](output_trt, torch.Tensor([[1.0, 1.0]]))[0]
