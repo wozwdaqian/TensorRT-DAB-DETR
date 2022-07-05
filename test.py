@@ -21,6 +21,8 @@ import tensorrt as trt
 np.random.seed(97)
 num = 0
 batch_size = 1
+all_time = 0.0
+image_num = 105
 
 
 absolute_logits = [] # logits绝对误差[[平均值, 最大值, 中位数]......]
@@ -112,7 +114,7 @@ engine, context = load_trt_model(trtFile, batch_size)
 
 for image, target in dataset_val:
     print("----------------------", num)
-    if num == 100:
+    if num == image_num:
         break
     num += 1
     image = image[None]
@@ -166,7 +168,9 @@ for image, target in dataset_val:
 #     output_trt = postprocessors['bbox'](output_trt, torch.Tensor([[1.0, 1.0]]))[0]
 
     # 加速倍率
-    print("加速倍率:{}".format(float(time_pth)/float(time_trt)))
+    if num >= 5:
+        all_time += time_pth/time_trt
+    print("加速倍率:{}".format(time_pth/time_trt))
     # logits
     error_num = defference(output_pth_['pred_logits'].detach().cpu().numpy().flatten().astype("float"), outputH0.flatten().astype("float"), "logits", error_num)
     # boxes
@@ -177,3 +181,6 @@ for image, target in dataset_val:
     cudart.cudaFree(inputD0)
     cudart.cudaFree(outputD0)
     cudart.cudaFree(outputD1)
+
+# 减去开头几张的加速倍率
+print("平均加速倍率: ", all_time/(image_num-5))
