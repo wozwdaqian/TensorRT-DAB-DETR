@@ -271,9 +271,9 @@ WelfordBlockAllReduce 是借助 WelfordWarpReduce 操作完成的，具体逻辑
 本团队采用了COCO数据集作为测试集，样本数量为100张。原模型单张样本的推理速度约为0.03s。
 
 
-在使用第一版Plugin替换Layer Normlization的表现为单张推理速度约为0.01s，加速倍率在3.2-3.6倍左右。
+在使用第一版Plugin替换Layer Normlization的表现的加速倍率在1.43倍左右。
 
-使用第二版Plugin替换Layer Normlization的表现为单张推理速度约为0.01s，加速倍率在3.5-4倍左右，相对于第一个版本，加速更为稳定。
+使用第二版Plugin替换Layer Normlization的表现的加速倍率在1.43倍左右。
 
 logits绝对误差的平均值:9.e-04, 最大值:0.002, 中位数:6.e-04；logits相对误差的平均值:1.e-04, 最大值:0.004, 中位数:7.e-05。
 
